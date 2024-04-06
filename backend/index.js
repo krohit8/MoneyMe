@@ -2,7 +2,7 @@ const express=require("express")
 
 const cors=require("cors")
 const mainRouter=require("./routes/index")
-// const accountRouter=require("../backend/routes/account")
+
 const app=express();
 app.use(cors());
 app.use(express.json()); //order does matter

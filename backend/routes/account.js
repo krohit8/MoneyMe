@@ -1,22 +1,41 @@
-const express=require("express")
-// backend/routes/account.js
 
+const express = require('express');
 const { authMiddleware } = require('../middleware');
 const { Account } = require('../db.');
 const { default: mongoose } = require('mongoose');
 
-const router=express.Router()
-
+const router = express.Router();
 
 router.get("/balance", authMiddleware, async (req, res) => {
+    console.log(req.userId)
     const account = await Account.findOne({
         userId: req.userId
     });
-
+console.log(account)
+if(!account){
+    return res.status(403).json({
+        message:"account does not exist"
+    })
+}
     res.json({
+        message:`Your balance in account is ${account.balance}`,
         balance: account.balance
     })
 });
+
+
+// router.get("/balance", authMiddleware, async (req, res) => {
+//     const account = await Account.findOne({
+//         userId: req.userId
+//     });
+
+//     res.json({
+//         balance: account.balance
+//     })
+// });
+
+
+
 
 router.post("/transfer", authMiddleware, async (req, res) => {
     const session = await mongoose.startSession();
@@ -44,16 +63,16 @@ router.post("/transfer", authMiddleware, async (req, res) => {
     }
 
     // Perform the transfer
+    // await Account.updateOne({ userId: req.userId }, { $inc: { balance: -amount } }).session(session);
+    // await Account.updateOne({ userId: to }, { $inc: { balance: amount } }).session(session);
     await Account.updateOne({ userId: req.userId }, { $inc: { balance: -amount } }).session(session);
     await Account.updateOne({ userId: to }, { $inc: { balance: amount } }).session(session);
 
     // Commit the transaction
     await session.commitTransaction();
-
     res.json({
         message: "Transfer successful"
     });
 });
 
-
-module.exports=router;
+module.exports = router;
